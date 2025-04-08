@@ -1,14 +1,14 @@
-import ffmpeg
+import os
 import wave
 import contextlib
+
+import ffmpeg
 import torch
 import numpy as np
-import os
-
-from logger import setup_logger
-from config import Config
 from dotenv import load_dotenv
-import os
+
+from .logger import setup_logger
+from .config import Config
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,14 +17,22 @@ logger = setup_logger()
 
 def extract_audio(mp4_path: str, output_wav: str) -> None:
     """
-    Extract audio from mp4 and save as WAV file (mono, 16 kHz).
+    Extract audio from an MP4 file and save as mono WAV (default 16kHz).
+
+    Args:
+        mp4_path (str): Path to input MP4 video.
+        output_wav (str): Path to output WAV file.
+
+    Raises:
+        RuntimeError: If extraction fails.
     """
     try:
+        sample_rate = int(os.getenv('SAMPLE_RATE', '16000'))
         logger.info("Extracting audio from %s", mp4_path)
         (
             ffmpeg
             .input(mp4_path)
-            .output(output_wav, ac=1, ar=int(os.getenv('SAMPLE_RATE')), format='wav')
+            .output(output_wav, ac=1, ar=sample_rate, format='wav')
             .overwrite_output()
             .run(capture_stdout=True, capture_stderr=True)
         )
@@ -34,16 +42,24 @@ def extract_audio(mp4_path: str, output_wav: str) -> None:
         raise
 def extract_lossless_audio(mp4_path: str, output_path: str, format: str = 'flac') -> None:
     """
-    Extracts the original audio from mp4 and saves as lossless FLAC or copies AAC without re-encoding.
+    Extract original audio from MP4 and save as lossless FLAC or copy AAC without re-encoding.
+
+    Args:
+        mp4_path (str): Path to input MP4 video.
+        output_path (str): Path to output audio file.
+        format (str): 'flac' for lossless compression, 'aac' to copy AAC stream.
+
+    Raises:
+        ValueError: If unsupported format.
+        RuntimeError: If extraction fails.
     """
     try:
+        sample_rate = int(os.getenv('SAMPLE_RATE', '16000'))
         logger.info("Extracting lossless audio from %s", mp4_path)
         stream = ffmpeg.input(mp4_path)
         if format == 'flac':
-            # Decode and compress losslessly
-            stream = stream.output(output_path, ac=1, ar=int(os.getenv('SAMPLE_RATE')), format='flac')
+            stream = stream.output(output_path, ac=1, ar=sample_rate, format='flac')
         elif format == 'aac':
-            # Copy original AAC stream without re-encoding
             stream = stream.output(output_path, acodec='copy', format='m4a')
         else:
             raise ValueError(f"Unsupported format: {format}")
@@ -58,19 +74,38 @@ def extract_lossless_audio(mp4_path: str, output_path: str, format: str = 'flac'
         raise
 
 
-def read_wave(path: str):
-    """Reads a .wav file and returns (audio data, sample rate)."""
+def read_wave(path: str) -> Tuple[bytes, int]:
+    """
+    Read a mono WAV file.
+
+    Args:
+        path (str): Path to WAV file.
+
+    Returns:
+        Tuple[bytes, int]: PCM audio data and sample rate.
+
+    Raises:
+        AssertionError: If audio is not mono.
+    """
     with contextlib.closing(wave.open(path, "rb")) as wf:
         num_channels = wf.getnchannels()
         assert num_channels == 1, "Audio must be mono"
-        sample_width = wf.getsampwidth()
+        _ = wf.getsampwidth()
         sample_rate = wf.getframerate()
         pcm_data = wf.readframes(wf.getnframes())
         return pcm_data, sample_rate
 
 def frame_generator(frame_duration_ms: int, audio: bytes, sample_rate: int):
     """
-    Generates audio frames from PCM audio data.
+    Generate audio frames from PCM audio data.
+
+    Args:
+        frame_duration_ms (int): Frame size in milliseconds.
+        audio (bytes): PCM audio data.
+        sample_rate (int): Sample rate.
+
+    Yields:
+        Tuple[bytes, float]: Frame bytes and start time in seconds.
     """
     n = int(sample_rate * (frame_duration_ms / 1000.0) * 2)  # 2 bytes per sample (16-bit)
     offset = 0
@@ -122,10 +157,18 @@ def detect_voice(audio: bytes, sample_rate: int, frame_duration_ms=30):
 
     return results
 
-def group_silence_frames(vad_results, frame_duration_ms=30):
+def group_silence_frames(
+    vad_results: list, frame_duration_ms: int = 30
+) -> list:
     """
-    Groups consecutive frames with no speech and returns silence segments.
-    Each segment is represented as (start_time, end_time).
+    Group consecutive frames with no speech into silence segments.
+
+    Args:
+        vad_results (list): List of tuples (start_time_seconds, is_speech).
+        frame_duration_ms (int): Frame duration in milliseconds.
+
+    Returns:
+        list: List of (start_time, end_time) silence segments.
     """
     silence_segments = []
     segment_start = None
@@ -147,19 +190,49 @@ def group_silence_frames(vad_results, frame_duration_ms=30):
 
     return silence_segments
 
-def filter_by_duration(segments, threshold: float):
+
+def filter_by_duration(
+    segments: list, threshold: float
+) -> list:
     """
-    Filters segments that exceed the non-voice duration threshold.
+    Filter segments shorter than a duration threshold.
+
+    Args:
+        segments (list): List of (start_time, end_time) tuples.
+        threshold (float): Minimum duration in seconds.
+
+    Returns:
+        list: Filtered list of segments.
     """
     return [seg for seg in segments if (seg[1] - seg[0]) >= threshold]
 
+
 def seconds_to_mmss(seconds: float) -> str:
+    """
+    Convert seconds to MM:SS string.
+
+    Args:
+        seconds (float): Time in seconds.
+
+    Returns:
+        str: Time formatted as MM:SS.
+    """
     m, s = divmod(int(seconds), 60)
     return f"{m:02d}:{s:02d}"
 
-def generate_markdown_report(segments, output_md: str) -> None:
+
+def generate_markdown_report(
+    segments: list, output_md: str
+) -> None:
     """
-    Creates a Markdown file listing non-voice segments with minute formatting.
+    Create a Markdown report listing non-voice segments.
+
+    Args:
+        segments (list): List of (start_time, end_time) tuples.
+        output_md (str): Path to output Markdown file.
+
+    Raises:
+        RuntimeError: If report generation fails.
     """
     try:
         logger.info("Generating Markdown report: %s", output_md)
@@ -175,7 +248,18 @@ def generate_markdown_report(segments, output_md: str) -> None:
         logger.error("Error generating report: %s", e)
         raise
 
-def process_video(mp4_path: str, output_dir="audio", keep_temp_wav=False):
+
+def process_video(
+    mp4_path: str, output_dir: str = "audio", keep_temp_wav: bool = False
+) -> None:
+    """
+    Process a video file: extract audio, detect silence, and generate report.
+
+    Args:
+        mp4_path (str): Path to input MP4 video.
+        output_dir (str): Directory to save outputs.
+        keep_temp_wav (bool): Whether to keep intermediate WAV file.
+    """
     logger.debug("Received mp4_path argument: %s", mp4_path)
     import os
     import pathlib
