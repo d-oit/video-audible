@@ -89,7 +89,7 @@ Generates AI voiceovers from a completed script file.
 
 ### Usage
 ```bash
-python generate_voiceovers.py script_file.md --output-dir voiceovers
+python src/generate_voiceovers.py script_file.md --output-dir voiceovers
 ```
 
 ### Parameters
@@ -109,7 +109,7 @@ Combines original audio segments with AI voiceovers into a final audio file.
 
 ### Usage
 ```bash
-python combine_with_voiceovers.py segments_dir voiceovers_dir --output final_audio.mp3 --fade 0.5
+python src/combine_with_voiceovers.py segments_dir voiceovers_dir --output final_audio.mp3 --fade 0.5
 ```
 
 ### Parameters

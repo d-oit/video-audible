@@ -9,7 +9,7 @@ class SilenceDetector(BaseDetector):
     def __init__(self):
         super().__init__()
         self.db_threshold = Config.SILENCE_DB_THRESHOLD
-        self.min_duration = Config.MIN_SILENCE_DURATION
+        self.min_duration = self.get_min_duration(Config.MIN_SILENCE_DURATION)
 
     def _calculate_db(self, audio_tensor: torch.Tensor) -> float:
         """Calculate decibel level of audio frame relative to full scale.

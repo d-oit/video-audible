@@ -32,4 +32,4 @@ export PYTHONPATH="$PYTHONPATH:$(pwd)"
 mkdir -p "$OUTPUT_DIR"
 
 # Run the movie segments extraction script
-"$PYTHON_EXEC" extract_movie_segments.py "$AUDIO_FILE" --output-dir "$OUTPUT_DIR"
+"$PYTHON_EXEC" -m src.extract_movie_segments "$AUDIO_FILE" --output-dir "$OUTPUT_DIR"

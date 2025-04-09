@@ -7,3 +7,4 @@ scipy>=1.7.0  # Required by librosa
 soundfile>=0.10.3  # Required for audio I/O
 moviepy>=1.0.3  # For robust video processing
 silero-vad>=5.0.0  # For voice activity detection
+pydub>=0.25.1  # For audio processing and manipulation

@@ -93,7 +93,7 @@ fi
 echo "Using Python command: $PYTHON_CMD"
 
 # Call the standalone extract_audio.py script with input and output arguments
-"$PYTHON_CMD" extract_audio.py "$INPUT_FILE" "$OUTPUT_FILE"
+"$PYTHON_CMD" src/extract_audio.py "$INPUT_FILE" "$OUTPUT_FILE"
 RESULT=$?
 
 # Check if the output file was created

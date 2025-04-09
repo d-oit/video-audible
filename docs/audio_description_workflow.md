@@ -74,7 +74,7 @@ Once you've completed the script, generate voiceovers using an AI voice service:
 export ELEVENLABS_API_KEY="your-api-key-here"
 
 # Generate voiceovers
-python generate_voiceovers.py segments_output/voiceover_script.md --output-dir voiceovers
+python src/generate_voiceovers.py segments_output/voiceover_script.md --output-dir voiceovers
 ```
 
 This script:
@@ -95,7 +95,7 @@ If you prefer not to use ElevenLabs, other options include:
 The final step is to combine the original audio segments with the voiceovers:
 
 ```bash
-python combine_with_voiceovers.py segments_output voiceovers --output final_audio.mp3
+python src/combine_with_voiceovers.py segments_output voiceovers --output final_audio.mp3
 ```
 
 This will:

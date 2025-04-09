@@ -35,9 +35,15 @@ class MovieSegmentExtractor:
         movie_segments = []
 
         # Get speech and music segments
-        speech_segments = [AudioSegment(**seg) for seg in results["speech"]]
-        music_segments = [AudioSegment(**seg) for seg in results["music"]]
-        silence_segments = [AudioSegment(**seg) for seg in results["silence"]]
+        # Filter out 'duration' field which is not accepted by AudioSegment constructor
+        def create_segment(seg_dict):
+            # Create a copy of the dictionary without the 'duration' field
+            filtered_dict = {k: v for k, v in seg_dict.items() if k != 'duration'}
+            return AudioSegment(**filtered_dict)
+
+        speech_segments = [create_segment(seg) for seg in results["speech"]]
+        music_segments = [create_segment(seg) for seg in results["music"]]
+        silence_segments = [create_segment(seg) for seg in results["silence"]]
 
         # Combine speech and music segments
         content_segments = speech_segments + music_segments

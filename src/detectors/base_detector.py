@@ -29,6 +29,18 @@ class BaseDetector(ABC):
         self.sample_rate = Config.SAMPLE_RATE
         self.frame_duration_ms = Config.FRAME_DURATION_MS
         self.enabled = True
+        self.non_voice_threshold = Config.NON_VOICE_DURATION_THRESHOLD
+
+    def get_min_duration(self, specific_threshold: float) -> float:
+        """Get the effective minimum duration by taking the max of specific and global thresholds.
+        
+        Args:
+            specific_threshold: The detector-specific minimum duration threshold
+            
+        Returns:
+            float: The effective minimum duration to use
+        """
+        return max(specific_threshold, self.non_voice_threshold)
 
     def _bytes_to_tensor(self, audio_bytes: bytes) -> torch.Tensor:
         """Convert PCM bytes to normalized float32 tensor in range [-1, 1].

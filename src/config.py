@@ -5,6 +5,10 @@ load_dotenv()  # Load variables from .env file
 
 class Config:
     # General audio processing settings
+    # Global voice detection settings
+    NON_VOICE_DURATION_THRESHOLD = float(os.getenv("NON_VOICE_DURATION_THRESHOLD", "2.0"))
+    
+    # Audio processing settings
     SAMPLE_RATE = int(os.getenv("SAMPLE_RATE", "16000"))
     FRAME_DURATION_MS = int(os.getenv("FRAME_DURATION_MS", "30"))
     

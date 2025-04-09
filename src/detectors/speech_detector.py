@@ -9,7 +9,7 @@ class SpeechDetector(BaseDetector):
     def __init__(self):
         super().__init__()
         self.threshold = Config.SPEECH_THRESHOLD
-        self.min_duration = Config.MIN_SPEECH_DURATION
+        self.min_duration = self.get_min_duration(Config.MIN_SPEECH_DURATION)
         self._initialize_model()
 
     def _initialize_model(self):

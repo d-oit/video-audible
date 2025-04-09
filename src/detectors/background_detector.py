@@ -10,7 +10,7 @@ class BackgroundDetector(BaseDetector):
     def __init__(self):
         super().__init__()
         self.threshold = Config.BACKGROUND_THRESHOLD
-        self.min_duration = Config.MIN_BACKGROUND_DURATION
+        self.min_duration = self.get_min_duration(Config.MIN_BACKGROUND_DURATION)
 
     def _calculate_background_features(self, audio_tensor: torch.Tensor) -> float:
         """

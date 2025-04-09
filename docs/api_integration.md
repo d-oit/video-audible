@@ -27,7 +27,7 @@ The default script uses a specific voice ID. To change the voice:
 1. Visit the ElevenLabs voice library
 2. Select a voice you prefer
 3. Copy the voice ID
-4. Modify the `VOICE_ID` variable in the `generate_voiceovers.py` script
+4. Modify the `VOICE_ID` variable in the `src/generate_voiceovers.py` script
 
 ### API Limits
 
@@ -47,7 +47,7 @@ To use [Amazon Polly](https://aws.amazon.com/polly/) instead of ElevenLabs:
 
 ### Implementation
 
-Replace the `generate_voiceover` function in `generate_voiceovers.py` with:
+Replace the `generate_voiceover` function in `src/generate_voiceovers.py` with:
 
 ```python
 import boto3

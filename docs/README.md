@@ -31,5 +31,5 @@ For detailed information about all available scripts and their parameters, see t
 Key scripts include:
 - `movie_audio_workflow.sh` - All-in-one interactive workflow
 - `extract_segments.sh` - Extract non-voice segments from video
-- `generate_voiceovers.py` - Create AI voiceovers from descriptions
-- `combine_with_voiceovers.py` - Combine original audio with voiceovers
+- `src/generate_voiceovers.py` - Create AI voiceovers from descriptions
+- `src/combine_with_voiceovers.py` - Combine original audio with voiceovers

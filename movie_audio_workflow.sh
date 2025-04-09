@@ -36,11 +36,11 @@ if [ -z "$ELEVENLABS_API_KEY" ]; then
     export ELEVENLABS_API_KEY
 fi
 
-python generate_voiceovers.py "$SEGMENTS_DIR/voiceover_script.md" --output-dir "$VOICEOVERS_DIR"
+python src/generate_voiceovers.py "$SEGMENTS_DIR/voiceover_script.md" --output-dir "$VOICEOVERS_DIR"
 
 # Step 4: Combine everything
 echo -e "\n=== Step 4: Combining segments with voiceovers ==="
-python combine_with_voiceovers.py "$SEGMENTS_DIR" "$VOICEOVERS_DIR" --output "$FINAL_OUTPUT"
+python src/combine_with_voiceovers.py "$SEGMENTS_DIR" "$VOICEOVERS_DIR" --output "$FINAL_OUTPUT"
 
 echo -e "\n=== Workflow Complete! ==="
 echo "Final audio file: $FINAL_OUTPUT"

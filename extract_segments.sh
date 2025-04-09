@@ -116,7 +116,7 @@ export PYTHONPATH="$PYTHONPATH:$(pwd)"
 mkdir -p "$OUTPUT_DIR"
 
 # Call the segments extraction script using the verified Python executable
-"$PYTHON_EXEC" extract_segments.py "$AUDIO_FILE" "$MD_FILE" "$OUTPUT_DIR"
+"$PYTHON_EXEC" src/extract_segments.py "$AUDIO_FILE" "$MD_FILE" "$OUTPUT_DIR"
 RESULT=$?
 
 # Check if any output files were created
